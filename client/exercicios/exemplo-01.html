@@ -1,0 +1,43 @@
+EXEMPLO QUE RETORNA NAN
+
+
+class Relogio {
+
+    constructor() {
+        this._segundos = 0;
+
+        setInterval(function () {
+            console.log(++this._segundos);
+          }, 1000);
+    }
+}
+
+var relogio = new Relogio();
+
+PRIMEIRA SOLUÇÃO - GUARDAR O THIS DO CONSTRUCTOR
+
+class Relogio {
+
+    constructor() {
+
+        let self = this; // guardando o this que é a instância da classe `Relogio`
+        this._segundos = 0;
+
+        setInterval(function () {
+            console.log(++self._segundos); // acessando a variável self, que é a instância de `Relogio` 
+          }, 1000);
+
+    }
+}
+
+USANDO ARROW FUNCTIONS
+
+class Relogio {
+
+    constructor() {
+        this._segundos = 0;
+        setInterval(() => console.log(++this._segundos), 1000); // usando arrow function. O this é o this de `Relogio`, e não `window`. 
+    }
+}
+
+var relogio = new Relogio();

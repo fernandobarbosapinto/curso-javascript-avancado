@@ -1,0 +1,67 @@
+<!-- troca-troca.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <p class="info">Era uma vez...</p>
+    <script>
+
+        class Aviao {
+
+            constructor(nome) {
+                this._nome = nome;
+            }
+
+            voa() {
+                alert(`${this._nome} está voando`);
+            }
+
+            ligaMotor() {
+                console.log('liga o motor');
+            }
+
+            fechaPortas() {
+                console.log('Portas sendo fechadas');
+            }
+        }
+
+        //REUTILIZAÇÃO DE CODIGO UTILIZANDO O MÉTODO DE COMPOSIÇÃO
+        class Passarinho {
+
+            constructor(nome) {
+                this._nome = nome;
+                // guarda uma instância de avião
+                this._aviao = new Aviao(nome);
+            }
+
+            voa() {
+                // usa o método voa de Aviao
+                this._aviao.voa();
+            }
+        }
+
+        //REUTILIZANDO O CÓDIGO UTILIZANDO O MÉTODO MIXIN
+        class Passarinho {
+
+            constructor(nome) {
+                this._nome = nome;
+            }
+
+            voa() {
+                // executa o método `voa` de `Avião` usando como contexto a instância de `Passarinho`
+                Reflect.apply(Aviao.prototype.voa, this, []);
+            }
+
+            // No ES5 - SOLUÇÃO MENOS VERBOSA
+            voar() {
+                Aviao.prototype.voa.apply(this, []);
+            }
+        }
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+//Sabemos que podemos declarar um objeto JavaScript com propriedades que podem armazenar funções (uma função que pertence ao objeto podemos chamar de método)
+
+var objeto = {
+    exibeMensagem : function(){
+        console.log("Olá");
+    }
+};
+
+//Com o ES2015 , podemos reescrever aquele código da seguinte maneira:
+
+var objeto = {
+    exibeMensagem() {
+        console.log("Olá");
+    }
+}
+
+//Vantagens do Proxy ==> O padrão de projeto Proxy nada mais é do que um objeto "falso", "mentiroso", que envolve e encapsula o objeto real que queremos interagir. É como se fosse uma interface, entre o objeto real e o resto do código. Conseguimos assim controlar o acesso aos seus atributos e métodos. Nele também podemos pendurar códigos que não cabem de estar alocados nos nossos modelos, mas que necessitam ser executados no caso de uma alteração ou atualização do mesmo.
+
+
+let pessoa = {
+    nome: 'Flávio'    
+}
+
+//O *target é o objeto real que é encapsulado pela proxy. É este objeto que não quisemos "sujar" com armadilhas ou qualquer código que não diga respeito ao modelo.
+//O *prop é a propriedade em si, que está sendo lida naquele momento.
+//O *receiver é a referência ao próprio proxy. É na configuração do handler do Proxy que colocamos armadilhas.
+
+let pessoaProxy = new Proxy(pessoa, {
+    get(target, prop, receiver) {
+         //...
+    }
+});
+
+//Temos o seguinte objeto literal (aquele criado com chaves):
+
+let funcionario = {email: 'abc@abc.com'};
+
+//Crie um proxy para este objeto, exibindo no console a mensagem "Armadilha aqui", toda vez que a propriedade email for lida.
+
+//Uma implementação possível é:
+let funcionario = {email: 'abc@abc.com'};
+let funcionarioProxy = new Proxy(funcionario,  {
+
+    get(target, prop, receiver) {
+        console.log('Armadilha aqui!');
+        return Reflect.get(target, prop, receiver);
+    }
+
+});
+console.log(funcionarioProxy.email);
+
+//Outra forma seria
+
+let funcionario = {email: 'abc@abc.com'};
+let funcionarioProxy = new Proxy(funcionario,  {
+
+    get(target, prop, receiver) {
+        console.log('Armadilha aqui!');
+        return target[prop];
+    }
+
+});
+console.log(funcionarioProxy.email);
+
+//Temos a seguinte classe:
+class Funcionario {
+
+    constructor(email) {
+        this._email = email;
+    }
+
+    get email() {
+        return this._email;
+    }
+
+    set email(email) {
+        this._email = email;
+    }
+}
+
+let funcionario = new Proxy(new Funcionario('abc@abc.com'), {
+
+    get(target, prop, receiver) {
+        console.log('Armadilha aqui!');
+        console.log(prop);
+        return Reflect.get(target, prop, receiver);
+    }
+
+});
+console.log(funcionario.email);
+
+let funcionario= new Proxy(new Funcionario('abc@abc.com'),  {
+
+    set(target, prop, value, receiver) {
+        console.log(prop); // imprimindo a propriedade que está sendo alterada
+        console.log(`Valor antigo ${target[prop]}, valor atual: ${value}`);
+        return Reflect.set(target, prop, value, receiver);
+    }
+});
+
+funcionario.email = 'aaa@aaa.com';
+
+/*************************************************************************************************************************/
+
+let funcionario = {email: 'abc@abc.com'};
+
+//Crie um proxy que exibe no console o valor da propriedade antes dela ser alterada e o valor novo.
+
+let funcionario = {email: 'abc@abc.com'};
+let funcionarioProxy = new Proxy(funcionario,  {
+
+    set(target, prop, value, receiver) {
+        console.log(`Valor antigo ${target[prop]}, valor atual: ${value}`);
+        return Reflect.set(target, prop, value, receiver);
+    }
+
+});
+funcionarioProxy.email = 'aaa@aaa.com';
+
+//ARGUMENTS
+
+Aprendemos lá no jardim de infância em JavaScript a passar parâmetros para funções e métodos. Vejamos um exemplo:
+function exibeNomeCompleto(nome, sobrenome) {
+
+  alert(`${nome} ${sobrenome}`);
+}
+
+exibeNomeCompleto('Flávio', 'Almeida');
+Contudo, podemos conseguir o mesmo resultado sem passar parâmetros para a função:
+
+function exibeNomeCompleto() {
+
+  alert(`${arguments[0]} ${arguments[1]}`);
+}
+
+exibeNomeCompleto('Flávio', 'Almeida');
+Por mais que nossa função não receba parâmetros, podemos ter acesso aos parâmetros passados com arguments. É uma variável implícita que nos dá acesso a todos os parâmetros passados para a função ou método. É claro que a primeira forma, nomear os parâmetros da função, é menos verbosa e mais legível. Mas há muitos hacks em JavaScript que podem fazer uso de arguments.
+
+Hora de praticar, implementando as novas funcionalidades apresentadas no capítulo. Como de costume, segue um resumo dos passos que devem ser executados:
+1 - Para não precisar lembrar de atualizar a view toda vez que qualquer operação de mudança ocorrer em nosso modelo, nós alteramos ListaNegociacoes e adicionamos armadilhas que são executadas quando determinados métodos são chamados. O problema dessa solução é que se quisermos fazer algo parecido com outros classes do nosso modelo precisaremos alterar cada uma delas. Além disso, misturar código de infraestrutura com o modelo não é salutar, porque ele passa a ter responsabilidade demais tornando difícil compreender a abstração do mundo real que ele materializa.
+
+2 - Implemente nesta seção a solução baseada em proxy. Nela, nosso modelo fica intacto, e toda a parte das armadilhas ficam no proxy, que nada mais é do que um cara mentiroso que se faz passar pelo objeto que ele encapsula.
+

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Negociações</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.css">
+    <style type="text/css">
+        th{cursor: pointer;}
+    </style>
+</head>
+<body class="container">
+    
+    <h1 class="text-center">Negociações</h1>
+    
+    <div id="mensagemView"></div>
+
+    <form class="form" onsubmit="negociacaoController.adiciona(event)">
+        
+        <div class="form-group">
+            <label for="data">Data</label>
+            <input type="text" placeholder="dd/mm/aaaa" id="data" class="form-control" required autofocus/>        
+        </div>    
+        
+        <div class="form-group">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" min="1" step="1" id="quantidade" class="form-control" value="1" required/>
+        </div>
+        
+        <div class="form-group">
+            <label for="valor">Valor</label>
+            <input id="valor" type="number" class="form-control"  min="0.01" step="0.01" value="0.0" required />
+        </div>
+        
+        <button class="btn btn-primary" type="submit">Incluir</button>
+    </form>
+    
+    <div class="text-center">
+        <!-- <button onclick="negociacaoController.importaNegociacoes()" class="btn btn-primary text-center" type="button">
+            Importar Negociações
+        </button> -->
+        <button onclick="negociacaoController.apaga()" class="btn btn-primary text-center" type="button">
+            Apagar
+        </button>
+    </div> 
+    <br>
+    <br>
+    
+    <div id="negociacoesView"></div>
+    <script type="text/javascript" src="js/app/polyfill/fetch.js"></script>
+    <script type="text/javascript" src="js/app/models/Negociacao.js"></script>
+    <script type="text/javascript" src="js/app/models/ListaNegociacoes.js"></script>
+    <script type="text/javascript" src="js/app/models/Mensagem.js"></script>
+    <script type="text/javascript" src="js/app/controllers/NegociacaoController.js"></script>
+    <script type="text/javascript" src="js/app/helpers/DateHelper.js"></script>
+    <script type="text/javascript" src="js/app/views/View.js"></script>
+    <script type="text/javascript" src="js/app/views/NegociacoesView.js"></script>
+    <script type="text/javascript" src="js/app/views/MensagemView.js"></script>
+    <script type="text/javascript" src="js/app/services/ProxyFactory.js"></script>
+    <script type="text/javascript" src="js/app/helpers/Bind.js"></script>
+    <script type="text/javascript" src="js/app/services/NegociacaoService.js"></script>
+    <script type="text/javascript" src="js/app/services/HttpService.js"></script>
+    <script type="text/javascript" src="js/app/services/ConnectionFactory.js"></script>
+    <script type="text/javascript" src="js/app/DAO/NegociacaoDAO.js"></script>
+    <script type="text/javascript">
+        //Então, podemos usar a seguinte regra: usamos var quando queremos que a variável tenha escopo global ou de função, e usarmos let quando queremos que a variável tenha sempre escopo de bloco. Em nosso caso, como nosso controller está no escopo global, faz todo sentido usarmos var.
+        var negociacaoController = new NegociacaoController();
+    </script>
+    <script type="text/javascript">
+        // let lista = new Proxy(new ListaNegociacoes(), {
+
+        //     get: function(target, prop, receiver){
+
+        //         if(['adiciona','esvazia'].includes(prop) && typeof(target[prop]) == typeof(Function)){
+
+        //             return function(){
+        //                 console.log(`a propriedade "${prop}" foi interceptada`);
+        //                 Reflect.apply(target[prop], target, arguments);
+        //             }
+        //         }
+        //         return Reflect.get(target, prop, receiver);
+                
+        //     }
+        //     set: function(target, prop, value, receiver){
+        //         console.log(`valor anterior: ${target[prop]} novo valor: ${value}`);
+        //         return Reflect.set(target, prop, value, receiver);
+        //     }
+        //     get: function(target, prop, receiver){
+        //         console.log(`A propriedade "${prop}" foi interceptada`);
+        //         return Reflect.get(target, prop, receiver);
+        //     }
+        // });
+        // lista.adiciona(new Negociacao(new Date(), 1, 100));
+        // lista.esvazia();
+        //negociacao._quantidade = 10;
+        //negociacao._valor = 200;
+        //console.log(negociacao.quantidade);
+        //console.log(negociacao.valor);
+    </script>
+    <!-- <script type="text/javascript">
+
+        let hoje = new Date();
+        
+        let n1 = new Negociacao(hoje, 5, 700);
+        n1.quantidade = 1000; //esse vaor não é repassado pois a propriedade é um getter (apenas de leitura) por isso não podemos atribuir um valor
+        n1._quantidade = 5000; //quantidade foi alterada pois o programador conseguiu acessar utilizando n1._quantidade
+        console.log(n1.quantidade);
+        console.log(n1.data);
+        console.log(n1.valor);
+        console.log(n1.volume);
+
+        console.log(n1.data);
+        n1.data.setDate(11);
+        hoje.setDate(11);
+        console.log(n1.data);
+
+        Exemplo de manipulação
+        var n2 = new Negociacao();
+        n2.quantidade = 20;
+        console.log(n2);
+
+        Como em JavaScript não existe escopo de bloco, então o fato de declararmos uma variável dentro de um bloco não garantirá que temos um escopo. No entanto, se declaramos as variável usando o let, estas ganharam um escopo de bloco 
+        for (let i = 1; i <= 100; i++) {
+            let nome = 'Fernando';
+            console.log(i);
+        }
+
+        alert(i);
+        alert(nome);
+
+
+        //criar uma nova lista com a mesma quantidade de números, mas cada elemento da nova lista deve ter seu valor dobrado quando for ímpar.
+
+        //Pode ser feito assim
+        let numeros = [3,2,11,20,8,7];
+        let novosNumeros = [];
+
+        numeros.forEach(item => {
+
+            if(item % 2  != 0) {
+                novosNumeros.push(item * 2);
+            } else {
+                novosNumeros.push(item);
+            }
+        });
+        console.log(novosNumeros);
+
+        //OU assim
+        let numeros = [3,2,11,20,8,7];
+        let novosNumeros = [];
+
+        numeros.forEach(item => {
+
+            if(item % 2) { // só entra no IF se o resultado for diferente de zero
+                novosNumeros.push(item * 2);
+            } else {
+                novosNumeros.push(item);
+            }
+        });
+        console.log(novosNumeros);
+
+        //Outra forma
+        let numeros = [3,2,11,20,8,7];
+        let novosNumeros = numeros.map(item =>  item % 2 ? item * 2 : item);
+        console.log(novosNumeros);
+
+        //Forma mais elegante
+        let numeros = [3,2,11,20,8,7];
+        let novosNumeros = numeros.map((item)=> (item%2 +1 ) * item);
+        console.log(novosNumeros);
+
+        //ES2015 trouxe uma novidade, o spread operator. Altere a passagem de parâmetros para somaDoisNumeros e faça uso do spread operator para receber um array, com isso, evitando a necessidade de usar numeros[0] e numeros[1].
+
+        function somaDoisNumeros(numero1, numero2) {
+            return numero1 + numero2;                                            
+        }
+        
+        numeros = [10,30];
+        console.log(somaDoisNumeros(...numeros));
+
+        //Altere o código abaixo para fazer uso de arrow functions. Tente ser o mais sucinto possível, em outras palavras, tente escrever a menor quantidade de código.
+        
+        //antes
+        var aprovados = avaliacoes
+            .filter(function(prova) { return prova.nota >= 7; })
+            .map(function(prova) { return prova.aluno.nome;});
+
+        console.log(aprovados);
+
+        //depois
+        let aprovados = avaliacoes
+            .filter(prova => prova.nota >= 7)
+            .map(prova => prova.aluno.nome);
+
+        console.log(aprovados);
+
+    </script> -->
+</body>
+</html>
